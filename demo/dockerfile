@@ -1,0 +1,30 @@
+# Stage 1: Build the application
+FROM maven:3.8.4-openjdk-17 AS builder
+
+WORKDIR /app
+
+# Copy the Maven project file to download dependencies
+COPY pom.xml .
+
+# Download dependencies only
+RUN mvn dependency:go-offline -B
+
+# Copy the project source
+COPY src ./src
+
+# Package the application
+RUN mvn package -DskipTests
+
+# Stage 2: Create the runtime image
+FROM openjdk:17-jdk-slim AS runtime
+
+WORKDIR /app
+
+# Copy the packaged jar file from the builder stage
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose the port
+EXPOSE 8080
+
+# Command to run the application
+CMD ["java", "-jar", "app.jar"]
