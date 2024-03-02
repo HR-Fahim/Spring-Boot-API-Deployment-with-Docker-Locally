@@ -1,65 +1,74 @@
-1.docker ps
+# Spring Boot API Deployment with Docker Locally
 
-kubectl config get-contexts
+This repository provides instructions and configurations to deploy a Spring Boot API using Docker Locally. The purpose of this repository was to understand the process of containerizing a Spring Boot application with Docker.
 
-kubectl config use-context docker-desktop
+## Prerequisites
 
-kubectl cnfig use-context docker-desktop
+- Docker installed and running on local machine.
 
-2.kubectl create deployment kbe-rest --image springframeworkguru/kbe-rest-brewery --dry-run=client -o=yaml > deployment.yml 
+- Basic knowledge of Docker and Spring Boot Framework.
 
-ls
+## Step-by-Step Local Deployment
 
-notepad deployment.yml
+### Step 1: Containerize Spring Boot Application with Docker
 
-kubectl apply -f deployment.yml
+1. **Dockerfile**: Create a Dockerfile in Spring Boot project directory as follows:
 
-kubectl get all
+    ```Dockerfile
+    # Stage 1: Build the application
+    FROM maven:3.8.4-openjdk-17 AS builder
 
-docker ps
+    WORKDIR /app
 
-3.kubectl create service clusterip kbe-rest --tcp=8080:8080 --dry-run=client -o=yaml >> service.yml
+    # Copy the Maven project file to download dependencies
+    COPY pom.xml .
 
-ls
+    # Download dependencies only
+    RUN mvn dependency:go-offline -B
 
-kubectl apply -f service.yml
+    # Copy the project source
+    COPY src ./src
 
-kubectl get all
+    # Package the application
+    RUN mvn package -DskipTests
 
-kubectl create service clusterip kbe-rest --tcp=8080:8080 --dry-run=client -o=yaml >> service.yml (check purpose)
+    # Stage 2: Create the runtime image
+    FROM openjdk:17-jdk-slim AS runtime
 
-notepad service.yml
+    WORKDIR /app
 
-4.ipconfig /all 
+    # Copy the packaged jar file from the builder stage
+    COPY --from=builder /app/target/*.jar app.jar
 
-kubectl port-forward service/kbe-rest 8080:8080 (by running)
+    # Expose the port
+    EXPOSE 8080
 
-curl localhost:8080/actuator/health (on another terminal)
+    # Command to run the application
+    CMD ["java", "-jar", "app.jar"]
+    ```
 
-5.kubectl get all
+2. **Build Docker Image**: Run the following command to build Docker image:
 
-kubectl delete service kbe-rest
+    ```
+    docker build -t spring-boot-app .
+    ```
 
-kubectl get all (Check purpose)
+3. **Verify**: After building the Docker image, verify it by running:
 
-docker ps
+    ```
+    docker images
+    ```
 
-6.notepad service.yml (change type to NodePort)
+### Step 2: Run Docker Container Locally
 
-kubectl apply -f deployment.yml
+1. **Run Container**: Once the Docker image is built, run a container locally with the following command:
 
-docker ps
+    ```
+    docker run -p 8080:8080 spring-boot-app
+    ```
 
-kubectl apply -f service.yml
+2. **Test**: Test Spring Boot application by accessing `http://localhost:8080/actuator/health` in web browser.
 
-kubectl get all (Check purpose)
+## License
 
-7.doker ps
-
-docker logs [CONTAINER ID]
-
-kubectl get all (Check purpose)
-
-kubectl logs --tail=20 [NAME (/kbe-rest-ID)]
-
-kubectl logs -f [NAME (/kbe-rest-ID)]
+This project is licensed under the [MIT License](LICENSE). Feel free to use and modify this project according to the terms of the license.
