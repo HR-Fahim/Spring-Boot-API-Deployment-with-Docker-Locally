@@ -68,7 +68,7 @@ This repository provides instructions and configurations to deploy a Spring Boot
     ```
 ![Docker Spring-Boot](https://github.com/HR-Fahim/Spring-Boot-API-Deployment-with-Docker-Locally/assets/66734379/188f984a-8023-449d-9184-7a1cd8f77286)
 
-2. **Test**: Test Spring Boot application by accessing `http://localhost:8080/actuator/health` in Postman.
+2. **Test**: Test Spring Boot application by accessing [API](http://localhost:8080/actuator/health) in Postman.
 
 ![Postman API](https://github.com/HR-Fahim/Spring-Boot-API-Deployment-with-Docker-Locally/assets/66734379/27c0a091-f83e-4be6-8287-8574af610886)
 
